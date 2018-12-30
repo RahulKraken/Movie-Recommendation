@@ -43,7 +43,7 @@ class MovieList(Resource):
 class UserRecommendation(Resource):
 
     @jwt_required()
-    def get(self, userId, k = 10):
+    def get(self, userId, k = 25):
         top_n = []
         for id in recommender.top_recommendation(userId, k):
             print(id)
