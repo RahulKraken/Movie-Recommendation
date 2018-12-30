@@ -1,16 +1,21 @@
 # --------------------------------- Import Statements ------------------------------
 
 from class_recommendation import Recommendation, Utils
-from class_recommendation import Utils
-import jsonpickle
+from security import authenticate, identity
 
 from flask import Flask
 from flask_restful import Api, Resource
+from flask_jwt import JWT, jwt_required
 
 # --------------------------------- Global Stuff ---------------------------------
 
 app = Flask(__name__)
 api = Api(app)
+
+# security thing
+app.secret_key = 'kajdkfalJDHJjshdkayeiupqnb'
+
+jwt = JWT(app, authenticate, identity)                      # /auth end-point created by this object
 
 global recommender, utils
 
@@ -24,6 +29,7 @@ recommender.update_movie_rating(4.0)
 
 class MovieList(Resource):
 
+    @jwt_required()
     def get(self):
         top_charts = []
         for id in recommender.top_n(10):
@@ -36,6 +42,7 @@ class MovieList(Resource):
 
 class UserRecommendation(Resource):
 
+    @jwt_required()
     def get(self, userId, k = 10):
         top_n = []
         for id in recommender.top_recommendation(userId, k):
@@ -45,7 +52,7 @@ class UserRecommendation(Resource):
                 "title": utils.get_movie_details(id)
             })
         return top_n
-
+    
 # ---------------------------------- Running the server ---------------------------
 
 api.add_resource(MovieList, '/top-charts')

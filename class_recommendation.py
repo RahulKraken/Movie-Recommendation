@@ -18,23 +18,22 @@ class Recommendation:
         # removing redundant row from movies dataframe
         self.movies = self.movies.iloc[:, 1:]
 
+
+    def create_similarity_matrices(self):
         # importing the user-item-rating matrix
         self.user_movie_rating = pd.read_csv('movie-ml-latest-small/user_movie_rating.csv')
 
         # matrix for similarity determination
-        self.user_movie_matrix = self.user_movie_rating.iloc[:, 1:]
+        # self.user_movie_matrix = self.user_movie_rating.iloc[:, 1:]
 
         # finding the similarity between users and items
-
-        self.user_similarity = pairwise_distances(self.user_movie_matrix, metric = 'cosine')
-        self.item_similarity = pairwise_distances(self.user_movie_matrix.T, metric = 'cosine')
+        self.user_similarity = pairwise_distances(self.user_movie_rating.iloc[:, 1:], metric = 'cosine')
+        self.item_similarity = pairwise_distances(self.user_movie_rating.iloc[:, 1:].T, metric = 'cosine')
 
         # proper indexing of the columns of similarity matrices
         self.user_similarity = pd.DataFrame(self.user_similarity, columns = self.user_movie_rating['userId'], index = self.user_movie_rating['userId'])
         self.item_similarity = pd.DataFrame(self.item_similarity, columns = self.movies['movieId'], index = self.movies['movieId'])
-        
-        self.create_predictions_df()
-        
+
     
     # predict rating for a particular movie by a particular user using user-user collaborative filtering or 
     # item-item collaborative filtering
@@ -48,34 +47,21 @@ class Recommendation:
         
         if type == 'user':
             temp = self.ratings[self.ratings.movieId == movieId]
-            # print("temp - ", temp)
-            # similar_user = -np.sort(-similarity[0])
             
             for item in temp.itertuples():
-                
-                # print("item - ", item)
-                # print("item[1] - ", item[1],  " - item[3] - ", item[3])
                 sum_rating_similarity = sum_rating_similarity + (self.user_similarity.at[userId, item[1]] * item[3])
-                # print("sum_rating_similarity - ", sum_rating_similarity)
                 
                 sum_similarity = sum_similarity + self.user_similarity.at[userId, item[1]]
-                # print("sum_similarity - ", sum_similarity)
             
             return (sum_rating_similarity / sum_similarity) if sum_similarity != 0 else 0
         
         elif type == 'item':
             temp = self.ratings[self.ratings.userId == userId]
-            # print("temp - ", temp)
             
             for item in temp.itertuples():
-                
-                # print("item - ", item)
-                # print("item[1] - ", item[1],  " - item[3] - ", item[3])
                 sum_rating_similarity = sum_rating_similarity + (self.item_similarity.at[movieId, item[2]] * item[3])
-                # print("sum_rating_similarity - ", sum_rating_similarity)
                 
                 sum_similarity = sum_similarity + self.item_similarity.at[movieId, item[2]]
-                # print("sum_similarity - ", sum_similarity)
             
             return (sum_rating_similarity / sum_similarity) if sum_similarity != 0 else 0
         
@@ -85,7 +71,7 @@ class Recommendation:
     # create a dateframe to store all the prediction
     def create_predictions_df(self):
         self.user_movie_prediction = pd.DataFrame(0.0, columns = self.movies['movieId'], index = np.arange(610))
-        self.user_movie_prediction['userId'] = self.user_movie_rating['userId']
+        self.user_movie_prediction['userId'] = self.ratings['userId'].unique()
 
     # populate user_movie_prediction with the updated predictions values for all users    
     def update_predictions(self, userId):
@@ -95,6 +81,8 @@ class Recommendation:
 
     # return k number of best recommendations for given userId
     def top_recommendation(self, userId, k = 10):
+        self.create_similarity_matrices()
+        self.create_predictions_df()
         self.update_predictions(userId)
         movie_list = []
         top_n = self.user_movie_prediction.iloc[userId - 1, :].sort_values(ascending = False).head(k).tolist()
@@ -140,7 +128,8 @@ class Recommendation:
             print(self.movie_rating.at[movie[1], 'score'])
 
     # return top n movies overall
-    def top_n(self, n):
+    def top_n(self, n = 25, min_rating = 4.0):
+        self.update_movie_rating(min_rating)
         return self.movie_rating.sort_values('score', ascending = False)['movieId'].head(n).tolist()
 
 # -------------------------------- Utilities --------------------------------
