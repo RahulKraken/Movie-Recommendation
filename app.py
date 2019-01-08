@@ -7,6 +7,8 @@ from flask import Flask
 from flask_restful import Api, Resource
 from flask_jwt import JWT, jwt_required
 
+from registeration import Registeration
+
 # --------------------------------- Global Stuff ---------------------------------
 
 app = Flask(__name__)
@@ -52,10 +54,12 @@ class UserRecommendation(Resource):
                 "title": utils.get_movie_details(id)
             })
         return top_n
+
     
 # ---------------------------------- Running the server ---------------------------
 
 api.add_resource(MovieList, '/top-charts')
 api.add_resource(UserRecommendation, '/user/<int:userId>')
+api.add_resource(Registeration, '/register')
 
 app.run(port=5000)
