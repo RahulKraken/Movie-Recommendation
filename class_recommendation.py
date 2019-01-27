@@ -13,10 +13,11 @@ class Recommendation:
     def __init__(self):
         # reading the dataset
         self.ratings = pd.read_csv('movie-ml-latest-small/ratings.csv')
-        self.movies = pd.read_csv('movie-ml-latest-small/movies_cleaned.csv')
+        # self.movies = pd.read_csv('movie-ml-latest-small/movies_cleaned.csv')
+        self.movies = pd.read_csv('movie-ml-latest-small/movies.csv')
 
         # removing redundant row from movies dataframe
-        self.movies = self.movies.iloc[:, 1:]
+        # self.movies = self.movies.iloc[:, 1:]
 
 
     def create_similarity_matrices(self):
@@ -139,7 +140,8 @@ class Utils:
     def __init__(self):
         # reading the dataset
         self.ratings = pd.read_csv('movie-ml-latest-small/ratings.csv')
-        self.movies = pd.read_csv('movie-ml-latest-small/movies_cleaned.csv')
+        # self.movies = pd.read_csv('movie-ml-latest-small/movies_cleaned.csv')
+        self.movies = pd.read_csv('movie-ml-latest-small/movies.csv')
 
     def get_movie_details(self, movieId):
         return self.movies.at[self.movies.index[self.movies['movieId'] == movieId].tolist()[0], 'title']

@@ -29,6 +29,11 @@ recommender.update_movie_rating(4.0)
 
 # ------------------------------------ Resources --------------------------------
 
+class HelloWorld(Resource):
+
+    def get(self):
+        return "Hello World from the server"
+
 class MovieList(Resource):
 
     @jwt_required()
@@ -58,6 +63,7 @@ class UserRecommendation(Resource):
     
 # ---------------------------------- Running the server ---------------------------
 
+api.add_resource(HelloWorld, '/')
 api.add_resource(MovieList, '/top-charts')
 api.add_resource(UserRecommendation, '/user/<int:userId>')
 api.add_resource(Registeration, '/register')
