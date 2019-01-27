@@ -14,11 +14,10 @@ class Recommendation:
         # reading the dataset
         self.ratings = pd.read_csv('movie-ml-latest-small/ratings.csv')
         # self.movies = pd.read_csv('movie-ml-latest-small/movies_cleaned.csv')
-        self.movies = pd.read_csv('movie-ml-latest-small/movies.csv')
+        self.movies = pd.read_csv('movie-ml-latest-small/movies_cleaned.csv')
 
         # removing redundant row from movies dataframe
         # self.movies = self.movies.iloc[:, 1:]
-
 
     def create_similarity_matrices(self):
         # importing the user-item-rating matrix
@@ -82,8 +81,8 @@ class Recommendation:
 
     # return k number of best recommendations for given userId
     def top_recommendation(self, userId, k = 10):
-        self.create_similarity_matrices()
-        self.create_predictions_df()
+        # self.create_similarity_matrices()
+        # self.create_predictions_df()
         self.update_predictions(userId)
         movie_list = []
         top_n = self.user_movie_prediction.iloc[userId - 1, :].sort_values(ascending = False).head(k).tolist()

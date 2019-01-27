@@ -5,6 +5,22 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+# create movies cleaned
+movies = pd.read_csv('movie-ml-latest-small/movies.csv')
+temp = []
+i = 0
+movies_cleaned = pd.DataFrame()
+for movie in movies['movieId']:
+    temp = movies[movies.movieId == movie]['genres']
+    temp = temp.iloc[0].split('|')
+    movies_cleaned.at[i, 'movieId'] = movie
+    for genre in temp:
+        movies_cleaned.at[i, genre] = 1
+    i = i + 1
+movies_cleaned = movies_cleaned.fillna(0)
+
+movies_cleaned.to_csv('movie-ml-latest-small/movies_cleaned.csv', encoding = 'UTF-8')
+
 # importing the dataframes
 df_movies = pd.read_csv('movies_cleaned.csv')
 df_ratings = pd.read_csv('ratings.csv')
@@ -57,4 +73,4 @@ for userId in userIds:
         user_movie_rating.at[userId - 1, movieId], j = getRating(userId, movieId, j)
 
 user_movie_rating = user_movie_rating.fillna(0)
-user_movie_rating.to_csv('user_movie_rating.csv', encoding = 'UTF-8')
+user_movie_rating.to_csv('movie-ml-latest-small/user_movie_rating.csv', encoding = 'UTF-8')

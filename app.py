@@ -7,6 +7,8 @@ from flask import Flask
 from flask_restful import Api, Resource
 from flask_jwt import JWT, jwt_required
 
+from database import Database
+
 from registeration import Registeration
 
 # --------------------------------- Global Stuff ---------------------------------
@@ -26,6 +28,13 @@ utils = Utils()
 
 # updating the movie-rating-matrix
 recommender.update_movie_rating(4.0)
+
+# creating the needed dataframes
+recommender.create_similarity_matrices()
+recommender.create_predictions_df()
+
+Database.create_table_users()
+Database.create_predictions_table()
 
 # ------------------------------------ Resources --------------------------------
 
@@ -52,15 +61,20 @@ class UserRecommendation(Resource):
     @jwt_required()
     def get(self, userId, k = 25):
         top_n = []
-        for id in recommender.top_recommendation(userId, k):
+        movie_list = Database.get_user_prediction(userId)
+        if movie_list:
+            print(movie_list)
+        else:
+            movie_list = recommender.top_recommendation(userId, k)
+            Database.add_user_prediction(userId, movie_list[:25])
+        for id in movie_list:
             print(id)
             top_n.append({
                 "movieId": id,
                 "title": utils.get_movie_details(id)
             })
-        return top_n
+        return top_n[:25]
 
-    
 # ---------------------------------- Running the server ---------------------------
 
 api.add_resource(HelloWorld, '/')
